@@ -1,4 +1,5 @@
 import prompts from "prompts"
+import chalk from "chalk"
 import type { Model, Fields, Field, CompareFields } from "./types"
 import {
   removeColumnQI,
@@ -42,18 +43,28 @@ export const compareModel = async (
       }
     }
   })
-  Object.keys(current.fields).forEach((key) => {
-    if (!old.fields[key]) {
-      newFields[key] = current.fields[key]
+  // console.log(current.fields)
+  for (const [key, value] of Object.entries(current.fields)) {
+    const field = value.field!
+    if (!old.fields[field] || !old.fields[field]) {
+      newFields[field] = current.fields[field]
     }
-  })
+  }
+  // Object.keys(current.fields).forEach((key) => {
+  //   if (!old.fields[key]) {
+  //     console.log(key)
+  //     newFields[key] = current.fields[key]
+  //   }
+  // })
   const missingFieldsKeys = Object.keys(missingFields)
   for (let index = 0; index < missingFieldsKeys.length; index++) {
     const fieldName = missingFieldsKeys[index]
     const { ans } = await prompts({
       name: "ans",
       type: "confirm",
-      message: `${fieldName} is missing in ${old.modelName} model. Have you deleted it?`,
+      message: `${chalk.green(fieldName)} is missing in ${chalk.green(
+        old.modelName
+      )} model. Have you deleted it?`,
     })
     if (ans) {
       upMig.push(removeColumnQI(old.tableName, missingFields[fieldName]))
@@ -63,8 +74,13 @@ export const compareModel = async (
       const { newField } = await prompts({
         name: "newField",
         type: "select",
-        message: `Select current model for ${fieldName} model`,
-        choices: Object.keys(newFields).map((n) => ({ title: n, value: n })),
+        message: `Select current field for ${chalk.bold.bgBlack.green(
+          fieldName
+        )} Field`,
+        choices: Object.entries(newFields).map(([key, value]) => ({
+          title: value.fieldName,
+          value: value.field,
+        })),
       })
       const cField = newFields[newField]
       const oField = missingFields[fieldName]
@@ -86,10 +102,10 @@ export const compareModel = async (
       delete missingFields[fieldName]
       delete newFields[newField]
     }
-    Object.keys(newFields).forEach((fieldName) => {
-      upMig.push(addColumnQI(current.tableName, newFields[fieldName]))
-      downMig.push(removeColumnQI(current.tableName, newFields[fieldName]))
-    })
   }
+  Object.keys(newFields).forEach((fieldName) => {
+    upMig.push(addColumnQI(current.tableName, newFields[fieldName]))
+    downMig.push(removeColumnQI(current.tableName, newFields[fieldName]))
+  })
   return true
 }

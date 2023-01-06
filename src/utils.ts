@@ -134,7 +134,7 @@ export const generateModel = (
     const _field = _fields[fieldName]
     const field = generateField(_field, fieldName, modelName)
     if (field) {
-      model.fields[fieldName] = field
+      model.fields[field.field!] = field
     }
     const fKeyC = generateFKC(_field, _model.tableName)
     if (fKeyC) {
