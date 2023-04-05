@@ -32,6 +32,21 @@ const sequelize = new Sequelize(/* options go here */)
 module.exports.sequelize = sequelize
 ```
 
+## Programmatic Use
+
+You can also import `makemigration` function and use it programmatically into your app.
+
+Here's an example of what your code might look like:
+
+```js
+// import makemigration function
+// import sequelize instance and your saved schema.
+// schema is optional, if you don't provide schema, it will generate new migration.
+const { makemigration } = require("sequelizemm")
+
+makemigration(sequelize, schema)
+```
+
 ## Creating Migrations:
 
 Once you have set up your Sequelize instance, you can use sequelizemm to create migrations for your project.
@@ -49,3 +64,18 @@ Once you have completed the prompts, `sequelizemm` will create a new migration f
 In addition to creating the migration file, `sequelizemm` will also create a schema.json file in your project's root directory. This file contains the current details of your Sequelize models and will be used to detect changes in your model structure for future migrations. It is important that you do not delete this file.
 
 By following these steps, you can easily create and manage migrations for your Sequelize project using sequelizemm.
+
+## Features:
+
+- Sync database with current models
+- Generate Up & Down Migration
+- Follows sequelize migration naming strategy
+- Add constraint automatically
+- Support ESM & CJS
+- Perform migration using transaction
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2033-present, Md Hashinur Rahman
