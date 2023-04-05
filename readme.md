@@ -14,13 +14,13 @@ npm i -g sequelizemm
 
 To run this application, you'll need to create a file called "sequelize.js" in the root directory of your application. Once you've done that, you can initialize your models and associations, and then export your Sequelize instance.
 
-To export your Sequelize instance, you should use a named export with the name "sequelize". This will allow other modules in your application to import and use your Sequelize instance as needed.
+To export your Sequelize instance, you should use a named export with the name "sequelize". This will allow the application to import and work with your Sequelize instance.
 
 Here's an example of what your code might look like:
 
 ```js
 // Import the Sequelize library
-const Sequelize = require("sequelize")
+const { Sequelize } = require("sequelize")
 
 // Create a new Sequelize instance
 const sequelize = new Sequelize(/* options go here */)
