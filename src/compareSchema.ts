@@ -128,9 +128,20 @@ export const compareSchema = async (
     type: "text",
     message: `Enter migration name`,
   })
+  const date = new Date()
+  const name = `${date.getUTCFullYear()}${date
+    .getUTCMonth()
+    .toString()
+    .padStart(2, "0")}${date.getUTCDate().toString().padStart(2, "0")}${date
+    .getUTCHours()
+    .toString()
+    .padStart(2, "0")}${date.getUTCMinutes().toString().padStart(2, "0")}${date
+    .getUTCSeconds()
+    .toString()
+    .padStart(2, "0")}-${migName}`
   await fs.writeFile(
-    `./${Date.now().toString()}-${migName}.js`,
+    `./migrations/${name}.js`,
     script.replaceAll(`"%%`, "").replaceAll(`%%"`, "").replaceAll("\\", "")
   )
-  await fs.writeFile(`./${Date.now().toString()}-${migName}.json`, saveCurrent)
+  await fs.writeFile(`./migrations/schema.json`, saveCurrent)
 }

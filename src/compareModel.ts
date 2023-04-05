@@ -8,6 +8,19 @@ import {
   changeColumnQI,
   renameTableQI,
 } from "./qi.js"
+
+const equalUnique = (c: any, o: any) => {
+  let cArg: any = c
+  let oArg: any = o
+  if (typeof c === "object" && c !== null && "arg" in c) {
+    console.log(c)
+    cArg = c.arg
+  }
+  if (typeof o === "object" && o !== null && "arg" in o) {
+    oArg = o.arg
+  }
+  return cArg === oArg
+}
 export const compareModel = async (
   current: Model,
   old: Model,
@@ -36,7 +49,7 @@ export const compareModel = async (
         cField.defaultValue !== oField.defaultValue ||
         cField.primaryKey !== oField.primaryKey ||
         JSON.stringify(cField.type) !== JSON.stringify(oField.type) ||
-        cField.unique !== oField.unique
+        !equalUnique(cField.unique, oField.unique)
       ) {
         upMig.push(changeColumnQI(current.tableName, cField))
         downMig.push(changeColumnQI(old.tableName, oField))
@@ -94,7 +107,7 @@ export const compareModel = async (
         cField.defaultValue !== oField.defaultValue ||
         cField.primaryKey !== oField.primaryKey ||
         JSON.stringify(cField.type) !== JSON.stringify(oField.type) ||
-        cField.unique !== oField.unique
+        !equalUnique(cField.unique, oField.unique)
       ) {
         upMig.push(changeColumnQI(current.tableName, cField))
         downMig.push(changeColumnQI(old.tableName, oField))

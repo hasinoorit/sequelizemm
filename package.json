@@ -1,8 +1,11 @@
 {
-  "name": "makemigration",
+  "name": "sequelizemm",
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "bin": {
+    "sequelizemm": "./bin/index.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
