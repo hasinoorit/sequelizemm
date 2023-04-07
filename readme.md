@@ -1,57 +1,37 @@
 # Sequelize Make Migration
 
-Sequelize Make Migration is a command line interface tool that makes it easy to create and manage migrations for your Sequelize project. This tool uses the Query Interface provided by Sequelize to create migration files that can be used to make changes to your database schema.
+Sequelize Make Migration is a command-line interface tool that simplifies the creation and management of migrations for your Sequelize project. This tool utilizes the Query Interface provided by Sequelize to create migration files that can be used to modify your database schema.
 
-## Installation:
+## Installation
 
-First install the library globally.
+To install the library globally, run the following command:
 
 ```bash
 npm i -g sequelizemm
 ```
 
-## Project setup:
+## Getting Started
 
-To run this application, you'll need to create a file called "sequelize.js" in the root directory of your application. Once you've done that, you can initialize your models and associations, and then export your Sequelize instance.
+Before you can use `sequelizemm`, you need to set up your Sequelize instance. To do this, create a file called sequelize.js in the root directory of your application, and then initialize your models and associations.
 
-To export your Sequelize instance, you should use a named export with the name "sequelize". This will allow the application to import and work with your Sequelize instance.
-
-Here's an example of what your code might look like:
+Here's an example of what your sequelize.js file might look like:
 
 ```js
-// Import the Sequelize library
 const { Sequelize } = require("sequelize")
 
-// Create a new Sequelize instance
 const sequelize = new Sequelize(/* options go here */)
 
-// Initialize your models and associations here
+// initialize models and associations here
 // ...
 
-// Export your Sequelize instance as a named export
 module.exports.sequelize = sequelize
 ```
 
-## Programmatic Use
+> Note: If you have exported the Sequelize instance from a file with a different name or path, you can specify the path to that file and the exported name using the --file and --name command-line arguments, respectively. See the Command-line Arguments section for more information.
 
-You can also import `makemigration` function and use it programmatically into your app.
+## Creating Migrations
 
-Here's an example of what your code might look like:
-
-```js
-// import makemigration function
-// import sequelize instance and your saved schema.
-// schema is optional, if you don't provide schema, it will generate new migration.
-const { makemigration } = require("sequelizemm")
-
-makemigration(sequelize, schema)
-```
-
-## Creating Migrations:
-
-Once you have set up your Sequelize instance, you can use sequelizemm to create migrations for your project.
-
-To create a new migration, run the following command in your terminal:
+To create a new migration file, run the following command in your terminal:
 
 ```bash
 sequelizemm
@@ -61,17 +41,37 @@ This will open an interactive prompt that will guide you through creating the mi
 
 Once you have completed the prompts, `sequelizemm` will create a new migration file in your project's migrations directory. This file will contain the necessary Query Interface code to make the changes you specified.
 
-In addition to creating the migration file, `sequelizemm` will also create a schema.json file in your project's root directory. This file contains the current details of your Sequelize models and will be used to detect changes in your model structure for future migrations. It is important that you do not delete this file.
+In addition to creating the migration file, `sequelizemm` will also create a schema.json file in your project's root directory. This file contains the current details of your Sequelize models and will be used to detect changes in your model structure for future migrations. Do not delete this file.
 
-By following these steps, you can easily create and manage migrations for your Sequelize project using sequelizemm.
+## Programmatic Use
 
-## Features:
+You can also import the makemigration function and use it programmatically in your application. Here's an example of what your code might look like:
 
-- Sync database with current models
-- Generate Up & Down Migration
-- Follows sequelize migration naming strategy
-- Add constraint automatically
-- Support ESM & CJS
+```js
+const { makemigration } = require("sequelizemm")
+
+makemigration(sequelize, schema)
+```
+
+> Note: The schema parameter is optional. If you don't provide a schema, a new migration will be generated.
+
+## Command-line Arguments
+
+You can use the following command-line arguments with sequelizemm:
+
+- --file or -f: Path to a file that exports the Sequelize instance (default: sequelize.js). Example: sequelizemm --file path/to/my/sequelize.js
+- --name or -n: Name of the exported Sequelize instance (default: sequelize). Example: sequelizemm --name mySequelize
+- --help or -h: Display help message. Example: sequelizemm --help
+
+> Note: All command-line arguments are optional.
+
+## Features
+
+- Synchronize database with current models
+- Generate up and down migrations
+- Follow Sequelize migration naming strategy
+- Add constraints automatically
+- Support ESM and CJS
 - Perform migration using transaction
 
 ## License
