@@ -42,9 +42,7 @@ const require = createRequire(import.meta.url)
 const cli = async () => {
   try {
     const { filePath, exportName } = parsedArgs()
-    const base = await import(join(process.cwd(), filePath)).catch(() => {
-      throw new Error("Sequelize declaration file not found")
-    })
+    const base = await import(join(process.cwd(), filePath))
     const dbi = base[exportName]
     if (!dbi || "Sequelize" !== dbi.constructor.name) {
       throw new Error("Sequelize export not found")
