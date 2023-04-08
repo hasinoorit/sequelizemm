@@ -13,6 +13,9 @@ const chalk__default = /*#__PURE__*/_interopDefaultCompat(chalk);
 const convertReference = (ref) => {
   return { table: ref.model, field: ref.key };
 };
+const getTableName = (model) => {
+  return model.modelDefinition?.table?.tableName || model.tableName;
+};
 const genDefaultValue = (val) => {
   if (typeof val === "object" && ["NOW", "UUID1", "UUID4"].includes(val.constructor.name)) {
     return `%%Sequelize.DataTypes.${val.constructor.name}%%`;
@@ -21,7 +24,10 @@ const genDefaultValue = (val) => {
 };
 const genDataType = (type) => {
   const _name = type.constructor.name === "JSONTYPE" ? "JSON" : type.constructor.name;
-  const jsonType = JSON.parse(JSON.stringify(type));
+  const jsonType = {};
+  if (type.options) {
+    jsonType.options = JSON.parse(JSON.stringify(type.options));
+  }
   const _rt = { type: _name };
   if (jsonType.options) {
     _rt.options = jsonType.options;
@@ -99,7 +105,7 @@ const generateField = (_field, fieldName, modelName) => {
 const generateModel = (_model, modelName) => {
   const model = {
     modelName,
-    tableName: _model.tableName,
+    tableName: getTableName(_model),
     fields: {}
   };
   const fkeyCs = {};
@@ -112,7 +118,7 @@ const generateModel = (_model, modelName) => {
     if (field) {
       model.fields[field.field] = field;
     }
-    const fKeyC = generateFKC(_field, _model.tableName);
+    const fKeyC = generateFKC(_field, getTableName(_model));
     if (fKeyC) {
       fkeyCs[fKeyC.name] = fKeyC;
     }
@@ -120,7 +126,7 @@ const generateModel = (_model, modelName) => {
   return {
     model,
     fKeyConstraints: fkeyCs,
-    uKeyConstraints: generateUKC(_model.uniqueKeys, model.tableName)
+    uKeyConstraints: generateUKC(_model.uniqueKeys, getTableName(model))
   };
 };
 

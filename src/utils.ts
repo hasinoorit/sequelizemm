@@ -5,6 +5,10 @@ export const convertReference = (ref: any) => {
   return { table: ref.model as string, field: ref.key as string }
 }
 
+export const getTableName = (model: any) => {
+  return model.modelDefinition?.table?.tableName || model.tableName
+}
+
 export const genDefaultValue = (val: any) => {
   if (
     typeof val === "object" &&
@@ -18,7 +22,10 @@ export const genDefaultValue = (val: any) => {
 export const genDataType = (type: Sequelize.DataType & any) => {
   const _name = type.constructor.name === "JSONTYPE" ? "JSON" : type.constructor.name
   // let options = ""
-  const jsonType = JSON.parse(JSON.stringify(type))
+  const jsonType: any = {}
+  if (type.options) {
+    jsonType.options = JSON.parse(JSON.stringify(type.options))
+  }
   // if (_name === "ENUM") {
   //   const { values } = JSON.parse(JSON.stringify(type))
   //   options = `('${values.join("','")}')`
@@ -123,7 +130,7 @@ export const generateModel = (
 ) => {
   const model: Model = {
     modelName: modelName,
-    tableName: _model.tableName,
+    tableName: getTableName(_model),
     fields: {},
   }
   const fkeyCs: FKeyConstraints = {}
@@ -136,7 +143,7 @@ export const generateModel = (
     if (field) {
       model.fields[field.field!] = field
     }
-    const fKeyC = generateFKC(_field, _model.tableName)
+    const fKeyC = generateFKC(_field, getTableName(_model))
     if (fKeyC) {
       fkeyCs[fKeyC.name] = fKeyC
     }
@@ -144,6 +151,6 @@ export const generateModel = (
   return {
     model,
     fKeyConstraints: fkeyCs,
-    uKeyConstraints: generateUKC(_model.uniqueKeys, model.tableName),
+    uKeyConstraints: generateUKC(_model.uniqueKeys, getTableName(model)),
   }
 }

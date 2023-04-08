@@ -67,6 +67,7 @@ You can use the following command-line arguments with sequelizemm:
 
 ## Features
 
+- Support Sequelize v6 & v7
 - Synchronize database with current models
 - Generate up and down migrations
 - Follow Sequelize migration naming strategy
