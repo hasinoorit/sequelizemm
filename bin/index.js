@@ -2,6 +2,7 @@
 
 import { join } from "path"
 import { existsSync } from "fs"
+import { pathToFileURL } from "url"
 import { makemigration } from "sequelizemm"
 import { createRequire } from "module"
 import chalk from "chalk"
@@ -42,7 +43,7 @@ const require = createRequire(import.meta.url)
 const cli = async () => {
   try {
     const { filePath, exportName } = parsedArgs()
-    const base = await import(join(process.cwd(), filePath))
+    const base = await import(pathToFileURL(join(process.cwd(), filePath)))
     const dbi = base[exportName]
     if (!dbi || "Sequelize" !== dbi.constructor.name) {
       throw new Error("Sequelize export not found")
@@ -54,6 +55,12 @@ const cli = async () => {
     } else {
       await makemigration(dbi)
     }
+    console.log(chalk.green(chalk.bold("Migration created successfully")))
+    console.log(
+      `If you have any issues or feedback, please feel free to visit the repository and create an issue: ${chalk.greenBright(
+        "https://github.com/hasinoorit/sequelizemm"
+      )}. Your input is greatly appreciated!`
+    )
   } catch (error) {
     console.log(chalk.bgWhiteBright(chalk.red(error.message)))
   }
