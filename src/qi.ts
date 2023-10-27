@@ -3,7 +3,7 @@ import type {
   QueryInterfaceIndexOptions,
   AddConstraintOptions,
 } from "sequelize"
-import type { Field, Model, FKeyConstraint, uniqueKey } from "./types"
+import type { Field, Model, FKeyConstraint, uniqueKey, Index } from "./types"
 import { dataTypeToString, genDefaultValue } from "./utils.js"
 
 export const createTableQI = (model: Model) => {
@@ -65,17 +65,25 @@ export const removeColumnQI = (tableName: string, field: Field) => {
   return `await queryInterface.removeColumn('${tableName}', '${field.field}', {transaction});`
 }
 
-export const addIndexQI = (
-  tableName: string,
-  attributes: string[],
-  options: QueryInterfaceIndexOptions
-) => {}
+export const addIndexQI = (index: Index) => {
+  const opt = {
+    fields: index.fields,
+    concurrently: index.concurrently,
+    unique: index.unique,
+    using: index.using,
+    operator: index.operator,
+    type: index.type,
+    name: index.name
+  }
 
-export const removeIndexQI = (
-  tableName: string,
-  indexName: string,
-  options?: QueryInterfaceIndexOptions
-) => {}
+  return `await queryInterface.addIndex('${index.tableName}', ${JSON.stringify(
+    opt
+  )}, {transaction});`
+}
+
+export const removeIndexQI = (index: Index) => {
+  return `await queryInterface.removeIndex('${index.tableName}', '${index.name}', {transaction});`
+}
 
 export const addConstraintQI = (
   tableName: string,

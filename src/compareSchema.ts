@@ -8,6 +8,8 @@ import {
   removeFKConstraintQI,
   addUniqueConstraintQI,
   removeUniqueConstraintQI,
+  removeIndexQI,
+  addIndexQI,
 } from "./qi.js"
 import { compareModel } from "./compareModel.js"
 
@@ -17,6 +19,7 @@ export const compareSchema = async (
     fKeyConstraints: {},
     models: {},
     uKeyConstraints: {},
+    indexes: {}
   }
 ) => {
   const saveCurrent = JSON.stringify(current)
@@ -106,6 +109,21 @@ export const compareSchema = async (
       downConstraint.push(removeUniqueConstraintQI(current.uKeyConstraints[key]))
     }
   })
+
+  const upIndex: string[] = []
+  const downIndex: string[] = []
+  Object.keys(old.indexes).forEach((key) => {
+    if (!current.indexes[key]) {
+      upIndex.push(removeIndexQI(old.indexes[key]))
+      downIndex.push(addIndexQI(old.indexes[key]))
+    }
+  })
+  Object.keys(current.indexes).forEach((key) => {
+    if (!old.indexes[key]) {
+      upIndex.push(addIndexQI(current.indexes[key]))
+      downIndex.push(removeIndexQI(current.indexes[key]))
+    }
+  })
   const script = `module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.sequelize.transaction(async (transaction) => {
@@ -114,12 +132,18 @@ export const compareSchema = async (
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${upConstraint.join("")}
     })
+    await queryInterface.sequelize.transaction(async (transaction) => {
+    ${upIndex.join("")}
+    })
   },down: async (queryInterface, Sequelize) => {
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${downConstraint.join("")}
     })
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${downQI.join("")}
+    })
+    await queryInterface.sequelize.transaction(async (transaction) => {
+    ${downIndex.join("")}
     })
   },
 };`
