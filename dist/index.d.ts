@@ -57,6 +57,20 @@ interface Schema {
     models: Models;
     fKeyConstraints: FKeyConstraints;
     uKeyConstraints: UKeyConstraints;
+    indexes: Indexes;
+}
+interface Index {
+    tableName: string;
+    name: string;
+    type: string | undefined;
+    using: string | undefined;
+    operator: string | undefined;
+    unique: boolean;
+    concurrently: boolean;
+    fields: string[];
+}
+interface Indexes {
+    [key: string]: Index;
 }
 
 declare const makemigration: (db: Sequelize, oldSchema?: Schema) => Promise<void>;
