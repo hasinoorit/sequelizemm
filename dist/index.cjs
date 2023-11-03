@@ -78,6 +78,22 @@ const generateUKC = (uniqueKeys, tableName) => {
   });
   return uKeys;
 };
+const generateIndexes = (indexes, tableName) => {
+  const idx = {};
+  indexes.forEach((index) => {
+    idx[index.name] = {
+      tableName,
+      name: index.name,
+      type: index.type,
+      using: index.using,
+      operator: index.operator,
+      unique: index.unique,
+      concurrently: index.concurrently,
+      fields: index.fields
+    };
+  });
+  return idx;
+};
 const generateField = (_field, fieldName, modelName) => {
   if (_field.type.constructor.name === "VIRTUAL")
     return null;
@@ -126,7 +142,8 @@ const generateModel = (_model, modelName) => {
   return {
     model,
     fKeyConstraints: fkeyCs,
-    uKeyConstraints: generateUKC(_model.uniqueKeys, getTableName(model))
+    uKeyConstraints: generateUKC(_model.uniqueKeys, getTableName(model)),
+    indexes: generateIndexes(_model._indexes, getTableName(model))
   };
 };
 
@@ -134,6 +151,7 @@ const currentSchema = (db) => {
   const models = {};
   const fKeyConstraints = {};
   const uKeyConstraints = {};
+  const indexes = {};
   const modelNames = Object.keys(db.models);
   for (let mIndex = 0; mIndex < modelNames.length; mIndex++) {
     const modelName = modelNames[mIndex];
@@ -142,8 +160,9 @@ const currentSchema = (db) => {
     models[modelName] = modelWithFkeys.model;
     Object.assign(fKeyConstraints, modelWithFkeys.fKeyConstraints);
     Object.assign(uKeyConstraints, modelWithFkeys.uKeyConstraints);
+    Object.assign(indexes, modelWithFkeys.indexes);
   }
-  return { models, fKeyConstraints, uKeyConstraints };
+  return { models, fKeyConstraints, uKeyConstraints, indexes };
 };
 
 const createTableQI = (model) => {
@@ -193,6 +212,23 @@ const changeColumnQI = (tableName, field) => {
 };
 const removeColumnQI = (tableName, field) => {
   return `await queryInterface.removeColumn('${tableName}', '${field.field}', {transaction});`;
+};
+const addIndexQI = (index) => {
+  const opt = {
+    fields: index.fields,
+    concurrently: index.concurrently,
+    unique: index.unique,
+    using: index.using,
+    operator: index.operator,
+    type: index.type,
+    name: index.name
+  };
+  return `await queryInterface.addIndex('${index.tableName}', ${JSON.stringify(
+    opt
+  )}, {transaction});`;
+};
+const removeIndexQI = (index) => {
+  return `await queryInterface.removeIndex('${index.tableName}', '${index.name}', {transaction});`;
 };
 const addUniqueConstraintQI = (uniqueKey) => {
   const opt = { fields: uniqueKey.fields, name: uniqueKey.name, type: "unique" };
@@ -307,7 +343,8 @@ const compareModel = async (current, old, upMig, downMig) => {
 const compareSchema = async (current, old = {
   fKeyConstraints: {},
   models: {},
-  uKeyConstraints: {}
+  uKeyConstraints: {},
+  indexes: {}
 }) => {
   const saveCurrent = JSON.stringify(current);
   const upQI = [];
@@ -391,6 +428,20 @@ const compareSchema = async (current, old = {
       downConstraint.push(removeUniqueConstraintQI(current.uKeyConstraints[key]));
     }
   });
+  const upIndex = [];
+  const downIndex = [];
+  Object.keys(old.indexes).forEach((key) => {
+    if (!current.indexes[key]) {
+      upIndex.push(removeIndexQI(old.indexes[key]));
+      downIndex.push(addIndexQI(old.indexes[key]));
+    }
+  });
+  Object.keys(current.indexes).forEach((key) => {
+    if (!old.indexes[key]) {
+      upIndex.push(addIndexQI(current.indexes[key]));
+      downIndex.push(removeIndexQI(current.indexes[key]));
+    }
+  });
   const script = `module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.sequelize.transaction(async (transaction) => {
@@ -399,12 +450,18 @@ const compareSchema = async (current, old = {
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${upConstraint.join("")}
     })
+    await queryInterface.sequelize.transaction(async (transaction) => {
+    ${upIndex.join("")}
+    })
   },down: async (queryInterface, Sequelize) => {
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${downConstraint.join("")}
     })
     await queryInterface.sequelize.transaction(async (transaction) => {
     ${downQI.join("")}
+    })
+    await queryInterface.sequelize.transaction(async (transaction) => {
+    ${downIndex.join("")}
     })
   },
 };`;

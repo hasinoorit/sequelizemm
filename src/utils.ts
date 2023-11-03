@@ -1,5 +1,5 @@
 import Sequelize from "sequelize"
-import { Model, Field, FKeyConstraint, FKeyConstraints, UKeyConstraints } from "./types"
+import { Model, Field, FKeyConstraint, FKeyConstraints, UKeyConstraints, Indexes } from "./types"
 
 export const convertReference = (ref: any) => {
   return { table: ref.model as string, field: ref.key as string }
@@ -96,6 +96,23 @@ const generateUKC = (uniqueKeys: any, tableName: string): UKeyConstraints | null
   return uKeys
 }
 
+const generateIndexes = (indexes: any, tableName: string): Indexes | null => {
+  const idx: Indexes = {}
+  indexes.forEach((index: any) => {
+    idx[index.name] = {
+      tableName,
+      name: index.name,
+      type: index.type,
+      using: index.using,
+      operator: index.operator,
+      unique: index.unique,
+      concurrently: index.concurrently,
+      fields: index.fields
+    };
+  });
+  return idx
+}
+
 const generateField = (
   _field: Sequelize.ModelAttributeColumnOptions<Sequelize.Model<any, any>>,
   fieldName: string,
@@ -121,6 +138,7 @@ const generateField = (
   if (_field.defaultValue) {
     field.defaultValue = genDefaultValue(_field.defaultValue)
   }
+
   return field
 }
 
@@ -152,5 +170,6 @@ export const generateModel = (
     model,
     fKeyConstraints: fkeyCs,
     uKeyConstraints: generateUKC(_model.uniqueKeys, getTableName(model)),
+    indexes: generateIndexes(_model._indexes, getTableName(model))
   }
 }

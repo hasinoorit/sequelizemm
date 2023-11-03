@@ -76,9 +76,25 @@ export interface Schema {
   models: Models
   fKeyConstraints: FKeyConstraints
   uKeyConstraints: UKeyConstraints
+  indexes: Indexes
 }
 
 export interface AddColumn {
   tableName: string
   fieldName: string
+}
+
+export interface Index {
+  tableName: string
+  name: string
+  type: string | undefined
+  using: string | undefined
+  operator: string | undefined
+  unique: boolean
+  concurrently: boolean
+  fields: string[]
+}
+
+export interface Indexes {
+  [key: string]: Index
 }
