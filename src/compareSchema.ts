@@ -164,8 +164,8 @@ export const compareSchema = async (
     .toString()
     .padStart(2, "0")}-${migName}`
   await fs.writeFile(
-    `./migrations/${name}.js`,
+    `./${process.env.SEQ_MM_MIGRATIONS_PATH || 'migrations'}/${name}.js`,
     script.replaceAll(`"%%`, "").replaceAll(`%%"`, "").replaceAll("\\", "")
   )
-  await fs.writeFile(`./migrations/schema.json`, saveCurrent)
+  await fs.writeFile(`./${process.env.SEQ_MM_SCHEMA_PATH || 'migrations/schema.json'}`, saveCurrent)
 }
