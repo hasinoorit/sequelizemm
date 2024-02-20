@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.2",
+    "@types/node": "^20.11.19",
     "@types/prompts": "^2.4.1",
     "@types/sequelize": "^4.28.14",
     "sequelize": "^6.25.3",
